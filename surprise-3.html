@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sirf tumhare liye</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#fdf0ee;--bg2:#f4d2d9;--ink:#3b1a2c;--soft:#8a5a6b;--gold:#a9574d;--rose:#c2415f;--card:#ffffffa6;--line:#c2415f55;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1a0c1d;--bg2:#3b1231;--ink:#f8e8e4;--soft:#c9a0a8;--gold:#ebbba5;--rose:#e8607f;--card:#ffffff14;--line:#e8607f66}}
+:root[data-theme="dark"]{--bg1:#1a0c1d;--bg2:#3b1231;--ink:#f8e8e4;--soft:#c9a0a8;--gold:#ebbba5;--rose:#e8607f;--card:#ffffff14;--line:#e8607f66}
+*{box-sizing:border-box}
+html{height:100%;background:radial-gradient(120% 70% at 50% 0%,var(--bg2),var(--bg1) 70%) no-repeat var(--bg1)}
+body{height:100%;margin:0;max-width:560px;margin:0 auto;display:flex;flex-direction:column;color:var(--ink);font-family:"Jost",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#story{flex:1;overflow-y:auto;padding:68px 28px 24px;scroll-behavior:smooth}
+.hero{text-align:center;margin:4vh 0 44px;transition:opacity .45s ease}
+.hero.gone{opacity:0}
+.hero small{display:block;font-size:15px;color:var(--soft);letter-spacing:.06em}
+.hero h1{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-style:italic;font-weight:500;font-size:68px;line-height:1.05;margin:10px 0 18px}
+.hero .div{display:flex;align-items:center;gap:12px;justify-content:center;color:var(--rose);font-size:16px}
+.hero .div:before,.hero .div:after{content:"";width:56px;height:1px;background:var(--line)}
+.l,.r{font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-size:24px;line-height:1.4;margin:0 0 20px;animation:in .6s ease both}
+.l{max-width:26ch}
+.r{max-width:22ch;margin-left:auto;text-align:right;font-style:italic;color:var(--gold);padding-right:14px;border-right:2px solid var(--rose)}
+.big{font-size:38px;line-height:1.2;font-style:italic;font-weight:600;margin-top:30px}
+.ph{width:210px;height:270px;border-radius:105px 105px 16px 16px;margin:8px 0 26px;overflow:hidden;display:grid;place-items:center;font-size:52px;background:linear-gradient(160deg,var(--rose),var(--gold));box-shadow:0 0 0 6px var(--card),0 0 0 7px var(--line);animation:in .8s ease both}
+.ph img{width:100%;height:100%;object-fit:cover}
+.typing{display:flex;gap:6px;height:30px;align-items:center;margin-bottom:20px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--rose);animation:p 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+footer{flex:none;padding:12px 28px 18px}
+#next{width:100%;font:500 16px "Jost",-apple-system,Arial,sans-serif;letter-spacing:.03em;color:var(--ink);background:var(--card);border:1px solid var(--rose);border-radius:999px;padding:15px;cursor:pointer;transition:background .2s,color .2s,opacity .2s}
+#next:hover:not(:disabled){background:var(--rose);color:#fff}
+#next:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+#next:disabled{opacity:.45;cursor:default}
+.petal{position:fixed;bottom:-30px;color:var(--rose);animation:up 3.4s linear forwards;pointer-events:none}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+@keyframes p{50%{opacity:.25}}
+@keyframes up{to{transform:translateY(-112vh) rotate(40deg);opacity:0}}
+
+/* ---------- Music player ---------- */
+#player{position:fixed;z-index:20;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 6px;border-radius:999px;background:var(--card);border:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#player .disc{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,var(--bg1) 0 14%,transparent 15%),conic-gradient(var(--rose),var(--gold),var(--rose),var(--gold),var(--rose));box-shadow:0 0 0 1px var(--line)}
+#player.on .disc{animation:spin 4s linear infinite}
+#player .meta{display:flex;flex-direction:column;line-height:1.15;max-width:110px}
+#player .meta b{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#player .meta span{font-size:10px;color:var(--soft)}
+.eq{display:flex;align-items:flex-end;gap:2px;height:16px}
+.eq i{width:3px;height:4px;background:var(--rose);border-radius:2px}
+#player.on .eq i{animation:eq 0.9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.45s}.eq i:nth-child(4){animation-delay:.1s}
+#pp{width:34px;height:34px;border-radius:50%;border:0;background:var(--rose);color:#fff;font-size:14px;cursor:pointer;display:grid;place-items:center}
+#pp:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes eq{0%,100%{height:4px}50%{height:16px}}
+
+/* ---------- Extra sections ---------- */
+#more[hidden]{display:none}
+#more{animation:in .8s ease both}
+.sec{margin:46px 0 0;padding-top:26px;border-top:1px solid var(--line)}
+.sec h2{font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:600;font-size:34px;line-height:1.15;margin:0 0 6px}
+.sec .sub{margin:0 0 18px;color:var(--soft);font-size:15px}
+.btn{width:100%;font:500 16px "Jost",-apple-system,Arial,sans-serif;color:#fff;background:var(--rose);border:0;border-radius:999px;padding:14px;cursor:pointer;transition:opacity .2s}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+textarea{width:100%;font:400 16px "Jost",-apple-system,Arial,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;resize:vertical;margin:0 0 12px}
+textarea:focus{outline:2px solid var(--rose);outline-offset:1px}
+textarea::placeholder{color:var(--soft)}
+
+/* counter */
+.cd-days{text-align:center;font-family:"Cormorant Garamond",Georgia,serif;font-size:76px;font-weight:600;line-height:1;color:var(--rose)}
+.cd-days small{display:block;font:400 14px "Jost",sans-serif;color:var(--soft);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}
+.cd-grid div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 4px;text-align:center}
+.cd-grid b{display:block;font-size:26px;font-weight:500;font-variant-numeric:tabular-nums}
+.cd-grid span{font-size:11px;color:var(--soft);letter-spacing:.08em;text-transform:uppercase}
+.bar{height:8px;border-radius:99px;background:var(--card);border:1px solid var(--line);overflow:hidden;margin:8px 0 6px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width .6s}
+.ms-note{font-size:14px;color:var(--soft);margin:0 0 14px}
+.ms-list{display:flex;flex-wrap:wrap;gap:8px}
+.ms-list span{font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--soft)}
+.ms-list span.hit{background:var(--rose);color:#fff;border-color:var(--rose)}
+
+/* mood */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.chips button{font:400 15px "Jost",sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:9px 14px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--rose);color:#fff;border-color:var(--rose)}
+.chips button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.out{margin-top:16px;padding:18px 18px;border-radius:18px;background:var(--card);border:1px solid var(--line);font-family:"Cormorant Garamond",Georgia,serif;font-size:23px;line-height:1.4;font-style:italic;animation:in .5s ease both}
+.out[hidden]{display:none}
+.out small{display:block;font:400 12px "Jost",sans-serif;font-style:normal;color:var(--soft);margin-top:10px}
+
+/* cards */
+.deck{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{perspective:800px;height:136px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit}
+.card:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:16px}
+.card .fl{position:relative;display:block;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.card.open .fl{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;padding:10px;text-align:center}
+.front{background:linear-gradient(160deg,var(--rose),var(--gold));color:#fff;font:600 30px "Cormorant Garamond",Georgia,serif}
+.back{transform:rotateY(180deg);background:var(--card);border:1px solid var(--line);font:500 16px/1.3 "Cormorant Garamond",Georgia,serif}
+.deck-count{margin:14px 0 0;text-align:center;font-size:14px;color:var(--soft)}
+
+/* wall */
+.who{display:flex;gap:8px;margin:0 0 12px}
+.who button{flex:1;font:400 14px "Jost",sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:9px 6px;cursor:pointer}
+.who button[aria-pressed="true"]{background:var(--rose);color:#fff;border-color:var(--rose)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--soft);margin:0 0 12px}
+.live i{width:8px;height:8px;border-radius:50%;background:#999}
+.live.on i{background:#3bb273;animation:p 1.6s infinite}
+.wstat{min-height:18px;font-size:13px;color:var(--soft);margin:8px 0 0}
+#wallList{margin-top:18px}
+.w{margin:0 0 12px;padding:12px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line);animation:in .4s ease both}
+.w.her{margin-left:14%}.w.him{margin-right:14%}
+.w p{margin:0;font-family:"Cormorant Garamond",Georgia,serif;font-size:21px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere}
+.w small{display:block;margin-top:6px;font-size:11px;color:var(--soft)}
+.empty{text-align:center;color:var(--soft);font-size:14px}
+.end{height:30px}
+@media (prefers-reduced-motion:reduce){.l,.r,.ph,#more,.out,.w{animation:none}#story{scroll-behavior:auto}.petal{display:none}#player.on .disc,#player.on .eq i{animation:none}.card .fl{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="player" role="group" aria-label="Music player">
+ <div class="disc" id="disc"></div>
+ <div class="meta"><b id="trk">Lofi for us</b><span>soft &middot; lofi</span></div>
+ <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+ <button id="pp" aria-label="Music chalao">&#9654;</button>
+</div>
+
+<div id="story">
+ <div class="hero" id="hero"><small>sirf tumhare liye</small><h1 id="nm"></h1><div class="div">♥</div></div>
+</div>
+
+<div id="more" hidden>
+
+ <section class="sec" id="secCount">
+  <h2>Hamara waqt ⏳</h2>
+  <p class="sub">Jabse hum saath hain, ek ek pal gin raha hu.</p>
+  <div class="cd-days"><span id="cdD">0</span><small>din saath</small></div>
+  <div class="cd-grid">
+   <div><b id="cdH">00</b><span>ghante</span></div>
+   <div><b id="cdM">00</b><span>minute</span></div>
+   <div><b id="cdS">00</b><span>second</span></div>
+   <div><b id="cdMs">000</b><span>ms</span></div>
+  </div>
+  <p class="ms-note" id="msNote"></p>
+  <div class="bar" aria-hidden="true"><i id="msBar"></i></div>
+  <div class="ms-list" id="msList"></div>
+ </section>
+
+ <section class="sec" id="secMood">
+  <h2>Aaj ka mood? 💭</h2>
+  <p class="sub">Bata do kaisa lag raha hai, tumhare liye ek chhota sa message milega.</p>
+  <div class="chips" id="moodChips"></div>
+  <textarea id="moodText" rows="2" maxlength="200" placeholder="Kuch aur batana hai? (optional)"></textarea>
+  <button class="btn" id="moodGo">Mera message ✨</button>
+  <div class="out" id="moodOut" hidden aria-live="polite"></div>
+ </section>
+
+ <section class="sec" id="secCards">
+  <h2>Tumse pyaar kyun hai 💌</h2>
+  <p class="sub">Har card ek wajah hai. Ek ek karke kholo.</p>
+  <div class="deck" id="deck"></div>
+  <p class="deck-count" id="deckCount"></p>
+ </section>
+
+ <section class="sec" id="secWall">
+  <h2>Hamari secret diary 📖</h2>
+  <p class="sub">Yahan jo bhi likhoge, dono ko live dikhega.</p>
+  <div class="live" id="live"><i></i><span id="liveTxt">connect ho raha hai...</span></div>
+  <div class="who" id="who"></div>
+  <textarea id="wallText" rows="3" maxlength="500" placeholder="Apni baat likho..."></textarea>
+  <button class="btn" id="wallGo">Diary me likho ♥</button>
+  <p class="wstat" id="wallStat" aria-live="polite"></p>
+  <div id="wallList"></div>
+ </section>
+
+ <div class="end"></div>
+</div>
+
+<footer><button id="next">Kholo ♥</button></footer>
+
+<script>
+// ✏️ Yahan apne messages edit karo. s:"in" = tumhari baat, s:"out" = uska jawab
+// Photo lagani ho toh: {s:"in",img:"📸",src:"data:image/jpeg;base64,..."}
+var NAME="Jaan"; // uska pyara naam
+var MY_NAME="Main"; // diary me tumhara naam
+
+// ✏️ Kab se saath ho? (YYYY-MM-DDTHH:MM:SS)
+var START_DATE="2024-02-14T18:00:00";
+// ✏️ Milestones (din me)
+var MILESTONES=[100,200,365,500,730,1000,1500,2000];
+
+// ✏️ AI mood generator (OpenRouter)
+var OR_KEY="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";
+var OR_MODEL="openai/gpt-4o-mini";
+
+// ✏️ Music: apna mp3 link/file dalna ho toh yahan likho (e.g. "song.mp3"). Khali chhodo toh built-in soft lofi chalega.
+var MUSIC_URL="";
+var MUSIC_TITLE="Lofi for us";
+
+// ✏️ "Tumse pyaar kyun hai" cards, apne words me badlo
+var REASONS=[
+"Tumhari hansi mere poore din ko achha bana deti hai 😊",
+"Tum mujhe waise hi accept karti ho jaisa main hu.",
+"Tumhare saath chup rehna bhi sukoon lagta hai.",
+"Tum meri baatein dhyan se sunti ho, chahe kitni bhi faltu hon 😄",
+"Tumhare paas ghar jaisa feel hota hai.",
+"Mushkil din me bhi tum mujhe himmat deti ho.",
+"Tumhara gussa bhi pyara lagta hai 🙈",
+"Tumhare saath future sochna achha lagta hai.",
+"Tum chhoti chhoti baatein yaad rakhti ho.",
+"Tumhari awaaz meri favourite lori hai.",
+"Tumne mujhe behtar insaan banne ki wajah di.",
+"Tum mere liye sabse safe jagah ho.",
+"Tumhare saath har plan adventure ban jata hai.",
+"Jab tum muskurati ho, sab kuch slow ho jata hai.",
+"Tum meri sabse achhi dost bhi ho.",
+"Tumhari care bina bole sab keh deti hai.",
+"Tumhare saath khana bhi zyada tasty lagta hai 🍕",
+"Tum jaisi ho, bas waisi hi perfect ho.",
+"Tum mere har din ko special banati ho.",
+"Sabse badi wajah: tum tum ho ❤️"
+];
+
+var script=[
+{s:"in",t:"Hey "+NAME+" 👋"},
+{s:"in",t:"Ek chhota sa surprise hai tumhare liye 🙈"},
+{s:"out",t:"Surprise? Kya hai? 😮"},
+{s:"in",t:"Bas thoda sabr... pehle ek sawaal: pehli baar kab mile the yaad hai?"},
+{s:"out",t:"Haan yaad hai, kaise bhoolungi 😄"},
+{s:"in",t:"Us din mujhe nahi pata tha ki ye itna special hone wala hai ✨"},
+{s:"in",img:"📸"},
+{s:"in",t:"Tumse baat karke din achha ho jata hai, chahe kitna bhi bura ho."},
+{s:"out",t:"Aww 🥺"},
+{s:"in",t:"Tum meri sabse achhi aadat ho 😌"},
+{s:"in",t:"Aur haan, tumhari hansi mere liye best notification hai 🔔"},
+{s:"out",t:"Ab toh main blush kar rahi hu 🙈"},
+{s:"in",t:"Bas ye bolna tha: thank you, hamesha saath rehne ke liye ❤️"},
+{s:"in",t:"I love you, "+NAME+". Hamesha. 💖",big:1}
+];
+var i=0,story=document.getElementById("story"),btn=document.getElementById("next"),started=false,revealed=false;
+document.getElementById("nm").textContent=NAME;
+function add(el){story.appendChild(el);story.scrollTop=story.scrollHeight}
+function msg(x){
+ var e=document.createElement("div");
+ if(x.img){e.className="ph";if(x.src){var m=document.createElement("img");m.src=x.src;m.alt="";e.appendChild(m)}else e.textContent=x.img;return e}
+ e=document.createElement("p");e.className=(x.s==="out"?"r":"l")+(x.big?" big":"");e.textContent=x.t;return e}
+function petals(){for(var k=0;k<26;k++){(function(k){setTimeout(function(){var h=document.createElement("div");h.className="petal";h.textContent=["♥","✦","♡","♥"][k%4];h.style.left=Math.random()*95+"%";h.style.fontSize=(14+Math.random()*16)+"px";document.body.appendChild(h);setTimeout(function(){h.remove()},3500)},k*120)})(k)}}
+function next(){
+ if(btn.disabled)return;
+ if(!started){started=true;btn.textContent="Aage";var hr=document.getElementById("hero");hr.classList.add("gone");setTimeout(function(){hr.remove()},450);}
+ if(i>=script.length){reveal();return}
+ btn.disabled=true;var x=script[i++];
+ if(x.s==="in"&&x.t){var ty=document.createElement("div");ty.className="typing";ty.innerHTML="<i></i><i></i><i></i>";add(ty);
+  setTimeout(function(){ty.remove();add(msg(x));done()},Math.min(400+x.t.length*18,1400))}
+ else{add(msg(x));setTimeout(done,x.img?700:500)}
+}
+function done(){
+ if(i>=script.length){btn.textContent="Aur surprises ↓";btn.disabled=false;petals();return}
+ btn.disabled=false}
+function reveal(){
+ if(revealed)return;revealed=true;
+ var more=document.getElementById("more");
+ story.appendChild(more);more.hidden=false;
+ document.querySelector("footer").style.display="none";
+ setTimeout(function(){story.scrollTo({top:more.offsetTop-24})},50);
+}
+btn.onclick=next;
+story.addEventListener("click",function(e){if(started&&!revealed&&!e.target.closest("#more"))next()});
+
+/* ================= Music player ================= */
+(function(){
+ var player=document.getElementById("player"),pp=document.getElementById("pp"),trk=document.getElementById("trk");
+ trk.textContent=MUSIC_TITLE;
+ var playing=false,ctx=null,master=null,timer=null,stopT=null,step=0,audio=null;
+ var CH=[[261.63,329.63,392.00,493.88],[220.00,261.63,329.63,392.00],[174.61,220.00,261.63,329.63],[196.00,246.94,293.66,349.23]];
+ var BASS=[130.81,110.00,87.31,98.00];
+ var PENT=[523.25,587.33,659.25,783.99,880.00,1046.50];
+ function ensure(){
+  if(ctx)return;
+  var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  ctx=new AC();master=ctx.createGain();master.gain.value=0;
+  var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=1500;
+  master.connect(lp);lp.connect(ctx.destination);
+  var len=ctx.sampleRate*2,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+  for(var j=0;j<len;j++){d[j]=Math.random()<0.0015?(Math.random()*2-1)*0.5:(Math.random()*2-1)*0.008}
+  var nz=ctx.createBufferSource();nz.buffer=buf;nz.loop=true;nz.connect(master);nz.start();
+ }
+ function note(f,t,dur,type,vol,att){
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.value=f;o.detune.value=(Math.random()-.5)*12;
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.05);
+ }
+ function bar(){
+  var t=ctx.currentTime+0.05,c=CH[step%4];
+  for(var k=0;k<c.length;k++)note(c[k],t,4.6,"triangle",0.05,0.6);
+  note(BASS[step%4],t,4,"sine",0.14,0.05);
+  for(var n=0;n<4;n++){if(Math.random()<0.7)note(PENT[Math.floor(Math.random()*PENT.length)],t+0.4+n*0.95+Math.random()*0.3,1.8,"sine",0.04,0.02)}
+  step++;
+ }
+ function ui(){player.classList.toggle("on",playing);pp.innerHTML=playing?"&#10074;&#10074;":"&#9654;";pp.setAttribute("aria-label",playing?"Music roko":"Music chalao")}
+ function play(){
+  if(MUSIC_URL){
+   if(!audio){audio=new Audio(MUSIC_URL);audio.loop=true}
+   audio.play().then(function(){playing=true;ui()}).catch(function(){playing=false;ui()});return;
+  }
+  ensure();if(!ctx)return;
+  clearTimeout(stopT);
+  ctx.resume();
+  master.gain.cancelScheduledValues(ctx.currentTime);
+  master.gain.setTargetAtTime(0.9,ctx.currentTime,0.4);
+  bar();timer=setInterval(bar,4000);
+  playing=true;ui();
+ }
+ function pause(){
+  if(MUSIC_URL&&audio){audio.pause()}
+  else if(ctx){
+   clearInterval(timer);
+   master.gain.cancelScheduledValues(ctx.currentTime);
+   master.gain.setTargetAtTime(0,ctx.currentTime,0.3);
+   stopT=setTimeout(function(){ctx.suspend()},1500);
+  }
+  playing=false;ui();
+ }
+ pp.addEventListener("click",function(e){e.stopPropagation();playing?pause():play()});
+ ui();
+})();
+
+/* ================= Together counter ================= */
+(function(){
+ var start=new Date(START_DATE).getTime();
+ var eD=document.getElementById("cdD"),eH=document.getElementById("cdH"),eM=document.getElementById("cdM"),eS=document.getElementById("cdS"),eMs=document.getElementById("cdMs");
+ var note=document.getElementById("msNote"),bar=document.getElementById("msBar"),list=document.getElementById("msList");
+ function p2(n){return n<10?"0"+n:""+n}
+ var lastDays=-1;
+ function milestones(days){
+  var prev=0,nxt=null;
+  for(var k=0;k<MILESTONES.length;k++){if(MILESTONES[k]<=days)prev=MILESTONES[k];else{nxt=MILESTONES[k];break}}
+  if(nxt===null){note.textContent="Saare milestones pure ho gaye 🎉";bar.style.width="100%"}
+  else{note.textContent="Agla milestone: "+nxt+" din · "+(nxt-days)+" din baaki";bar.style.width=Math.min(100,Math.max(0,(days-prev)/(nxt-prev)*100))+"%"}
+  list.innerHTML="";
+  MILESTONES.forEach(function(m){var s=document.createElement("span");var hit=m<=days;if(hit)s.className="hit";s.textContent=(hit?"✓ ":"")+m+" din";list.appendChild(s)});
+ }
+ function tick(){
+  var d=Math.max(0,Date.now()-start);
+  var days=Math.floor(d/864e5);
+  eD.textContent=days;
+  eH.textContent=p2(Math.floor(d%864e5/36e5));
+  eM.textContent=p2(Math.floor(d%36e5/6e4));
+  eS.textContent=p2(Math.floor(d%6e4/1e3));
+  eMs.textContent=("00"+(d%1e3)).slice(-3);
+  if(days!==lastDays){lastDays=days;milestones(days)}
+  requestAnimationFrame(tick);
+ }
+ tick();
+})();
+
+/* ================= AI mood note ================= */
+(function(){
+ var MOODS=[
+  {k:"sad",e:"😢",l:"Sad"},{k:"miss",e:"🥺",l:"Missing you"},{k:"stress",e:"😰",l:"Stressed"},
+  {k:"angry",e:"😤",l:"Gussa"},{k:"tired",e:"😴",l:"Thaki hui"},{k:"happy",e:"🥰",l:"Happy"}
+ ];
+ var FALLBACK={
+  sad:["Jaan, jo bhi ho raha hai, ye waqt bhi guzar jayega. Main tumhare saath hu, hamesha. 🤍","Aaj thoda rona bhi theek hai, bas yaad rakhna ki tum akeli nahi ho. Ek tight hug bheja hai 🫂"],
+  miss:["Main bhi tumhe utna hi miss kar raha hu. Jab tak milte nahi, ye soch lena ki dil tumhare paas hi hai 💗","Doori sirf kilometers ki hai, dil toh hamesha tumhare paas hai 🥺❤️"],
+  stress:["Gehri saans lo. Tum sab sambhal logi, aur jab thak jao toh main hu na 🫶","Ek time pe ek kaam. Tum jitna sochti ho usse kahin zyada strong ho 💪💖"],
+  angry:["Theek hai, gussa nikaal lo. Phir mujhe batana, main sunta rahunga (aur sorry bhi bol dunga 😅)","Gussa karti ho toh bhi cute lagti ho, par jaldi maan jao na please 🙈"],
+  tired:["Aaj bas aaram karo, baaki sab kal. Tumne already bahut kuch kiya hai 😴💞","Chai/coffee lo, thodi der aankhein band karo. Tum bohot achha kar rahi ho 🌙"],
+  happy:["Tumhe khush dekhna meri favourite cheez hai! Aise hi muskurati raho ✨","Tumhari khushi mere liye sabse bada tohfa hai 🥰"]
+ };
+ var sel=null,chips=document.getElementById("moodChips"),out=document.getElementById("moodOut"),go=document.getElementById("moodGo"),tx=document.getElementById("moodText");
+ MOODS.forEach(function(m){
+  var b=document.createElement("button");b.type="button";b.textContent=m.e+" "+m.l;b.setAttribute("aria-pressed","false");
+  b.onclick=function(){sel=m;[].forEach.call(chips.children,function(c){c.setAttribute("aria-pressed","false")});b.setAttribute("aria-pressed","true")};
+  chips.appendChild(b);
+ });
+ function show(t,fb){
+  out.hidden=false;out.textContent=t;
+  if(fb){var s=document.createElement("small");s.textContent="(AI abhi available nahi tha, ye pehle se likha hua message hai)";out.appendChild(s)}
+ }
+ go.onclick=function(){
+  var extra=tx.value.trim();
+  if(!sel&&!extra){out.hidden=false;out.textContent="Pehle koi mood chuno ya kuch likho 🙂";return}
+  go.disabled=true;go.textContent="Likh raha hu...";
+  var moodTxt=(sel?sel.l:"")+(extra?(sel?". ":"")+extra:"");
+  var ctrl=new AbortController(),to=setTimeout(function(){ctrl.abort()},20000);
+  fetch("https://openrouter.ai/api/v1/chat/completions",{
+   method:"POST",signal:ctrl.signal,
+   headers:{"Authorization":"Bearer "+OR_KEY,"Content-Type":"application/json"},
+   body:JSON.stringify({
+    model:OR_MODEL,max_tokens:180,temperature:0.9,
+    messages:[
+     {role:"system",content:"Tum ek pyaar karne wale boyfriend ki taraf se apni girlfriend "+NAME+" ko chhota romantic message likh rahe ho. Hinglish (Roman Hindi) me likho, 2 se 3 chhote warm sentences, 1-2 emoji. Agar wo sad, stressed ya thaki hui hai toh comfort do; missing you ho toh pyaar jatao; happy ho toh celebrate karo; gussa ho toh pyaar se manao. Sirf message likho, koi intro, quotes ya explanation nahi."},
+     {role:"user",content:"Uska mood: "+moodTxt}
+    ]
+   })
+  }).then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json()})
+  .then(function(j){var t=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;if(!t)throw new Error("empty");show(t.trim(),false)})
+  .catch(function(){var k=sel?sel.k:"miss",a=FALLBACK[k];show(a[Math.floor(Math.random()*a.length)],true)})
+  .then(function(){clearTimeout(to);go.disabled=false;go.textContent="Ek aur message ✨"});
+ };
+})();
+
+/* ================= Reasons deck ================= */
+(function(){
+ var deck=document.getElementById("deck"),cnt=document.getElementById("deckCount"),opened=0;
+ function upd(){cnt.textContent=opened+" / "+REASONS.length+" wajah khuli"+(opened===REASONS.length?" 💖":"")}
+ REASONS.forEach(function(r,idx){
+  var b=document.createElement("button");b.type="button";b.className="card";b.setAttribute("aria-label","Wajah number "+(idx+1));
+  var fl=document.createElement("span");fl.className="fl";
+  var f=document.createElement("span");f.className="face front";f.textContent=String(idx+1);
+  var k=document.createElement("span");k.className="face back";k.textContent=r;
+  fl.appendChild(f);fl.appendChild(k);b.appendChild(fl);
+  var seen=false;
+  b.onclick=function(){b.classList.toggle("open");if(!seen&&b.classList.contains("open")){seen=true;opened++;upd()}};
+  deck.appendChild(b);
+ });
+ upd();
+})();
+</script>
+
+<script type="module">
+/* ================= Live secret wall (Firebase Realtime Database) ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, query, limitToLast, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+var firebaseConfig={
+  apiKey:"AIzaSyAXs-rt_KU4d0BNOIvu3HushgUGVRUUkuM",
+  authDomain:"sagane.firebaseapp.com",
+  databaseURL:"https://sagane-default-rtdb.firebaseio.com",
+  projectId:"sagane",
+  storageBucket:"sagane.firebasestorage.app",
+  messagingSenderId:"509747736405",
+  appId:"1:509747736405:web:fec09510eb8a62860bc9dc",
+  measurementId:"G-QPC0S352FB"
+};
+
+var live=document.getElementById("live"),liveTxt=document.getElementById("liveTxt"),stat=document.getElementById("wallStat"),
+    list=document.getElementById("wallList"),ta=document.getElementById("wallText"),go=document.getElementById("wallGo"),whoBox=document.getElementById("who");
+var who="her";
+[["her","Main hu "+NAME],["him","Main hu "+MY_NAME]].forEach(function(p){
+  var b=document.createElement("button");b.type="button";b.textContent=p[1];b.setAttribute("aria-pressed",p[0]===who?"true":"false");
+  b.onclick=function(){who=p[0];[].forEach.call(whoBox.children,function(c){c.setAttribute("aria-pressed","false")});b.setAttribute("aria-pressed","true")};
+  whoBox.appendChild(b);
+});
+
+function render(items){
+  list.innerHTML="";
+  if(!items.length){var e=document.createElement("p");e.className="empty";e.textContent="Abhi diary khali hai. Pehli yaad tum likho ♥";list.appendChild(e);return}
+  items.forEach(function(it){
+    var d=document.createElement("div");d.className="w "+(it.who==="him"?"him":"her");
+    var p=document.createElement("p");p.textContent=String(it.text||"");
+    var s=document.createElement("small");
+    var when=it.ts?new Date(it.ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+    s.textContent=(it.who==="him"?MY_NAME:NAME)+(when?" · "+when:"");
+    d.appendChild(p);d.appendChild(s);list.appendChild(d);
+  });
+}
+
+try{
+  var app=initializeApp(firebaseConfig);
+  var db=getDatabase(app);
+  var wallRef=ref(db,"wall");
+  onValue(query(wallRef,limitToLast(100)),function(snap){
+    var items=[];snap.forEach(function(c){items.push(c.val())});
+    items.sort(function(a,b){return (b.ts||Date.now())-(a.ts||Date.now())});
+    live.classList.add("on");liveTxt.textContent="live";
+    render(items);
+  },function(err){
+    live.classList.remove("on");liveTxt.textContent="offline";
+    stat.textContent="Diary load nahi hui ("+(err&&err.code||"error")+"). Firebase Realtime Database rules check karo.";
+  });
+  go.onclick=function(){
+    var t=ta.value.trim();
+    if(!t){stat.textContent="Pehle kuch likho 🙂";return}
+    go.disabled=true;stat.textContent="";
+    push(wallRef,{who:who,text:t.slice(0,500),ts:serverTimestamp()})
+      .then(function(){ta.value="";stat.textContent="Save ho gaya ♥"})
+      .catch(function(err){stat.textContent="Save nahi hua ("+(err&&err.code||"error")+"). Firebase rules me write allow karo."})
+      .then(function(){go.disabled=false});
+  };
+}catch(e){
+  liveTxt.textContent="offline";
+  stat.textContent="Firebase connect nahi hua. Internet check karo.";
+}
+</script>
+</body>
+</html>
