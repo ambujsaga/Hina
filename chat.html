@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Hum Do 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--sky:#7fd6ff;--sun:#ffd23f;--pink:#ff6b9d;--grass:#5ed36b;--ink:#1b1b2f;--paper:#fffdf4;--card:#ffffff;--shadow:#1b1b2f;--muted:#5a5a78}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky:#2a6fa8;--paper:#2b2850;--card:#3a3670;--ink:#fffdf4;--shadow:#000;--muted:#c9c6e8}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Fredoka','Comic Sans MS',sans-serif;font-weight:500;color:var(--ink);background:var(--sky);
+    background-image:radial-gradient(rgba(255,255,255,.55) 3px,transparent 3.5px);background-size:28px 28px;overflow:hidden}
+  .cloud{position:fixed;width:120px;height:40px;background:#fff;border:4px solid #1b1b2f;border-radius:40px;opacity:.95;z-index:0;animation:drift 30s linear infinite;pointer-events:none}
+  .cloud::before{content:"";position:absolute;left:18px;top:-22px;width:50px;height:50px;background:#fff;border:4px solid #1b1b2f;border-radius:50%;border-bottom-color:transparent;border-right-color:transparent}
+  .c1{top:90px;left:-150px}.c2{top:260px;left:-150px;animation-duration:45s;animation-delay:-15s;transform:scale(.7)}
+  @keyframes drift{to{transform:translateX(calc(100vw + 300px))}}
+  .ground{position:fixed;left:0;right:0;bottom:0;height:22px;background:var(--grass);border-top:5px solid #1b1b2f;z-index:0;pointer-events:none}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  #app{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;max-width:700px;margin:0 auto;padding:10px 10px 8px}
+  header{background:var(--sun);color:#1b1b2f;padding:10px 14px;display:flex;align-items:center;gap:12px;border:4px solid #1b1b2f;border-radius:24px;box-shadow:5px 5px 0 var(--shadow)}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#fff;border:3px solid #1b1b2f;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+  #pname{font-family:'Bangers',sans-serif;font-weight:400;font-size:26px;letter-spacing:1.5px;line-height:1.05;color:#fff;-webkit-text-stroke:2px #1b1b2f;paint-order:stroke fill;text-shadow:2px 2px 0 #1b1b2f}
+  #pstatus{font-size:13px;font-weight:700}
+  #logoutBtn{margin-left:auto;font-family:'Bangers',sans-serif;font-size:17px;letter-spacing:1.2px;background:var(--pink);color:#fff;border:3px solid #1b1b2f;border-radius:999px;padding:5px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--shadow);transition:transform .12s,box-shadow .12s;white-space:nowrap}
+  #logoutBtn:hover{transform:translate(-2px,-2px) rotate(-2deg);box-shadow:5px 5px 0 var(--shadow)}
+  #logoutBtn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+
+  #msgs{flex:1;overflow-y:auto;margin:12px 0 4px;padding:14px 12px;display:flex;flex-direction:column;gap:8px;background:var(--card);border:4px solid #1b1b2f;border-radius:24px;box-shadow:5px 5px 0 var(--shadow)}
+  .row{display:flex}
+  .row.me{justify-content:flex-end}
+  .bubble{max-width:78%;padding:8px 13px 6px;border:3px solid #1b1b2f;border-radius:18px;font-size:15px;line-height:1.35;word-wrap:break-word;white-space:pre-wrap;box-shadow:3px 3px 0 var(--shadow)}
+  .me .bubble{background:var(--pink);color:#fff;border-bottom-right-radius:4px}
+  .other .bubble{background:#ffffff;color:#1b1b2f;border-bottom-left-radius:4px}
+  .time{display:block;font-size:10px;font-weight:700;opacity:.75;text-align:right;margin-top:2px}
+  .day{align-self:center;background:var(--sun);color:#1b1b2f;border:3px solid #1b1b2f;font-size:12px;font-weight:700;padding:2px 12px;border-radius:999px;margin:6px 0;box-shadow:2px 2px 0 var(--shadow)}
+  #typing{height:22px;padding:0 16px;font-size:13px;font-weight:700;color:#1b1b2f;font-style:italic}
+  form{display:flex;gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));margin-bottom:14px;background:var(--card);border:4px solid #1b1b2f;border-radius:999px;box-shadow:5px 5px 0 var(--shadow)}
+  #input{flex:1;padding:10px 16px;border:3px solid #1b1b2f;border-radius:22px;font-size:16px;outline:none;resize:none;max-height:100px;font-family:inherit;font-weight:500;background:#fff;color:#1b1b2f}
+  #input:focus{border-color:var(--pink)}
+  #send{width:46px;height:46px;border:3px solid #1b1b2f;border-radius:50%;background:var(--grass);color:#1b1b2f;font-size:20px;font-weight:700;cursor:pointer;align-self:flex-end;box-shadow:3px 3px 0 var(--shadow);transition:transform .12s,box-shadow .12s;flex:none}
+  #send:hover{transform:translate(-2px,-2px) rotate(-4deg);box-shadow:5px 5px 0 var(--shadow)}
+  #send:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+  input:focus-visible,button:focus-visible,textarea:focus-visible{outline:4px dashed var(--pink);outline-offset:3px}
+
+  #full{display:none;position:fixed;inset:0;background:var(--sky);background-image:radial-gradient(rgba(255,255,255,.55) 3px,transparent 3.5px);background-size:28px 28px;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:'Bangers',sans-serif;font-size:28px;letter-spacing:1.5px;color:#1b1b2f;z-index:10}
+  #gate{display:none;position:fixed;inset:0;background:var(--sky);background-image:radial-gradient(rgba(255,255,255,.55) 3px,transparent 3.5px);background-size:28px 28px;align-items:center;justify-content:center;padding:20px;z-index:20;overflow-y:auto}
+  .gbox{width:100%;max-width:380px;background:var(--card);border:5px solid #1b1b2f;border-radius:28px;padding:24px 20px;box-shadow:9px 9px 0 var(--shadow);text-align:center}
+  .gbox h2{font-family:'Bangers',sans-serif;font-weight:400;font-size:44px;letter-spacing:3px;margin-bottom:8px;color:var(--sun);-webkit-text-stroke:3px #1b1b2f;paint-order:stroke fill;text-shadow:4px 4px 0 #1b1b2f;transform:rotate(-3deg);display:inline-block}
+  .gbox p{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:14px}
+  .gbox input{width:100%;padding:12px 14px;border:4px solid #1b1b2f;border-radius:999px;font-size:16px;outline:none;font-family:inherit;font-weight:500;text-align:center;margin-bottom:10px;background:#fff;color:#1b1b2f}
+  .gbox input:focus{border-color:var(--pink)}
+  .gbtn{width:100%;padding:10px 12px;border:4px solid #1b1b2f;border-radius:999px;background:var(--grass);color:#1b1b2f;font-family:'Bangers',sans-serif;font-size:22px;letter-spacing:1.5px;cursor:pointer;margin-bottom:8px;box-shadow:4px 4px 0 var(--shadow);transition:transform .12s,box-shadow .12s}
+  .gbtn:hover{transform:translate(-2px,-2px) rotate(-2deg);box-shadow:7px 7px 0 var(--shadow)}
+  .gbtn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--shadow)}
+  .gbtn.alt{background:var(--sun)}
+  .gerr{color:#d6204f;font-size:14px;font-weight:700;min-height:18px;margin-bottom:6px}
+  .gdiv{height:0;border-top:4px dashed #1b1b2f;opacity:.35;margin:14px 0}
+  #newCode{font-family:'Bangers',sans-serif;font-size:42px;font-weight:400;letter-spacing:8px;color:var(--pink);-webkit-text-stroke:2px #1b1b2f;paint-order:stroke fill;text-shadow:3px 3px 0 #1b1b2f;margin:8px 0 12px;user-select:all}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div class="cloud c1"></div><div class="cloud c2"></div>
+<div class="ground"></div>
+
+<div id="app">
+  <header>
+    <div class="avatar">💕</div>
+    <div>
+      <div id="pname">Hum Do</div>
+      <div id="pstatus">connecting...</div>
+    </div>
+    <button id="logoutBtn" type="button">Logout ⎋</button>
+  </header>
+  <div id="msgs"></div>
+  <div id="typing"></div>
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="Message likho..." autocomplete="off"></textarea>
+    <button id="send" type="submit">➤</button>
+  </form>
+</div>
+<div id="full">🚫 Yeh chat sirf 2 logon ke liye hai.<br>Room full hai.</div>
+
+<div id="gate">
+  <div class="gbox">
+    <h2>Hum Do 💕</h2>
+    <p>Apna code dalo. Dono log same code daloge to chat shuru ho jayegi.</p>
+    <input id="codeIn" placeholder="CODE" maxlength="12" autocomplete="off" autocapitalize="characters">
+    <div class="gerr" id="codeErr"></div>
+    <button class="gbtn" id="joinBtn" type="button">Connect 💞</button>
+    <div class="gdiv"></div>
+    <button class="gbtn alt" id="mkBtn" type="button">Code banao</button>
+    <div id="mkBox" class="hide">
+      <input id="mkIn" type="text" placeholder="Verify karne ke liye dalo" autocomplete="off" autocapitalize="off">
+      <div class="gerr" id="mkErr"></div>
+      <button class="gbtn" id="mkGo" type="button">Verify</button>
+    </div>
+    <div id="newBox" class="hide">
+      <p>Yeh code apne partner ko bhejo:</p>
+      <div id="newCode"></div>
+      <button class="gbtn alt" id="copyBtn" type="button">Copy code</button>
+      <button class="gbtn" id="startBtn" type="button">Chat shuru karo ➤</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAXs-rt_KU4d0BNOIvu3HushgUGVRUUkuM",
+  authDomain: "sagane.firebaseapp.com",
+  databaseURL: "https://sagane-default-rtdb.firebaseio.com",
+  projectId: "sagane",
+  storageBucket: "sagane.firebasestorage.app",
+  messagingSenderId: "509747736405",
+  appId: "1:509747736405:web:fec09510eb8a62860bc9dc",
+  measurementId: "G-QPC0S352FB"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let base = 'chat';
+const $ = id => document.getElementById(id);
+let lastDay = '', typingTimer, partnerId = null, watching = null;
+
+// is device ki pehchaan
+let myId = localStorage.getItem('hd_id');
+if (!myId) { myId = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('hd_id', myId); }
+
+// code gate: pehli baar code manga jata hai, dono same code dalein to room me 2 devices slot le lete hain
+const OK_HASH = 'g7v8etkvj'; // allowed email ka hash (email app me kahin likha nahi hai)
+function hh(s) {
+  let a = 0xdeadbeef, b = 0x41c6ce57;
+  for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); a = Math.imul(a ^ c, 2654435761); b = Math.imul(b ^ c, 1597334677); }
+  a = Math.imul(a ^ (a >>> 16), 2246822507) ^ Math.imul(b ^ (b >>> 13), 3266489909);
+  b = Math.imul(b ^ (b >>> 16), 2246822507) ^ Math.imul(a ^ (a >>> 13), 3266489909);
+  return (4294967296 * (2097151 & b) + (a >>> 0)).toString(36);
+}
+
+function joinRoom(code) {
+  base = 'rooms/' + code;
+  db.ref(base + '/members').transaction(cur => {
+    cur = cur || {};
+    if (cur[myId]) return cur;
+    if (Object.keys(cur).length >= 2) return;
+    cur[myId] = true;
+    return cur;
+  }).then(res => {
+    $('gate').style.display = 'none';
+    if (!res.committed) { $('full').style.display = 'flex'; return; }
+    localStorage.setItem('hd_code', code);
+    start();
+  }).catch(e => { $('gate').style.display = 'none'; $('pstatus').textContent = 'Error: ' + e.message; });
+}
+
+function showGate() { $('gate').style.display = 'flex'; }
+
+$('codeIn').addEventListener('input', () => { $('codeIn').value = $('codeIn').value.toUpperCase().replace(/[^A-Z0-9]/g, ''); $('codeErr').textContent = ''; });
+$('joinBtn').onclick = async () => {
+  const code = $('codeIn').value.trim().toUpperCase();
+  if (code.length < 4) { $('codeErr').textContent = 'Pura code dalo'; return; }
+  $('codeErr').textContent = 'check ho raha hai...';
+  try {
+    const s = await db.ref('rooms/' + code + '/created').once('value');
+    if (!s.val()) { $('codeErr').textContent = 'Galat code'; return; }
+    $('codeErr').textContent = '';
+    joinRoom(code);
+  } catch (e) { $('codeErr').textContent = 'Error: ' + e.message; }
+};
+
+$('mkBtn').onclick = () => { $('mkBox').classList.toggle('hide'); $('mkErr').textContent = ''; };
+$('mkGo').onclick = async () => {
+  const v = $('mkIn').value.trim().toLowerCase();
+  if (hh(v) !== OK_HASH) { $('mkErr').textContent = 'Galat, code nahi ban sakta'; return; }
+  $('mkErr').textContent = '';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  try {
+    for (let n = 0; n < 8; n++) {
+      let c = '';
+      for (let i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)];
+      const r = await db.ref('rooms/' + c + '/created').transaction(cur => cur ? undefined : true);
+      if (r.committed) {
+        $('newCode').textContent = c;
+        $('mkBox').classList.add('hide'); $('mkBtn').classList.add('hide');
+        $('newBox').classList.remove('hide');
+        return;
+      }
+    }
+    $('mkErr').textContent = 'Phir se try karo';
+  } catch (e) { $('mkErr').textContent = 'Error: ' + e.message; }
+};
+$('copyBtn').onclick = () => {
+  const c = $('newCode').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(c).then(() => { $('copyBtn').textContent = 'Copy ho gaya ✓'; });
+};
+$('startBtn').onclick = () => joinRoom($('newCode').textContent);
+
+const savedCode = localStorage.getItem('hd_code');
+if (savedCode) joinRoom(savedCode); else showGate();
+
+// logout: code localStorage se hata do, listeners band karo, wapas login (code) page par
+$('logoutBtn').onclick = () => {
+  if (!confirm('Logout karna hai?')) return;
+  try {
+    db.ref(base + '/online/' + myId).onDisconnect().cancel();
+    db.ref(base + '/online/' + myId).remove();
+    db.ref(base + '/typing/' + myId).remove();
+    db.ref('.info/connected').off();
+    db.ref(base + '/members').off();
+    db.ref(base + '/messages').off();
+    if (watching) { db.ref(base + '/online/' + watching).off(); db.ref(base + '/typing/' + watching).off(); }
+  } catch (e) {}
+  localStorage.removeItem('hd_code');
+  watching = null; partnerId = null; lastDay = '';
+  base = 'chat';
+  $('msgs').innerHTML = '';
+  $('typing').textContent = '';
+  $('pstatus').textContent = 'connecting...';
+  $('input').value = '';
+  $('full').style.display = 'none';
+  $('codeIn').value = ''; $('codeErr').textContent = '';
+  showGate();
+};
+
+function start() {
+  const onlineRef = db.ref(base + '/online/' + myId);
+  db.ref('.info/connected').on('value', s => {
+    if (s.val()) { onlineRef.onDisconnect().remove(); onlineRef.set(true); }
+  });
+
+  db.ref(base + '/members').on('value', snap => {
+    const m = snap.val() || {};
+    partnerId = Object.keys(m).find(k => k !== myId) || null;
+    watchPartner();
+  });
+
+  db.ref(base + '/messages').limitToLast(300).on('child_added', snap => addMsg(snap.val()));
+}
+
+function watchPartner() {
+  if (watching === partnerId) return;
+  if (watching) { db.ref(base + '/online/' + watching).off(); db.ref(base + '/typing/' + watching).off(); }
+  watching = partnerId;
+  if (!partnerId) { $('pstatus').textContent = 'partner ka wait...'; return; }
+  db.ref(base + '/online/' + partnerId).on('value', s => {
+    $('pstatus').textContent = s.val() ? '🟢 online' : 'offline';
+  });
+  db.ref(base + '/typing/' + partnerId).on('value', s => {
+    $('typing').textContent = s.val() ? 'typing...' : '';
+  });
+}
+
+function addMsg(m) {
+  if (!m) return;
+  const box = $('msgs');
+  const d = new Date(m.ts || Date.now());
+  const dayStr = d.toDateString();
+  if (dayStr !== lastDay) {
+    lastDay = dayStr;
+    const day = document.createElement('div');
+    day.className = 'day';
+    day.textContent = dayStr === new Date().toDateString() ? 'Aaj' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    box.appendChild(day);
+  }
+  const row = document.createElement('div');
+  row.className = 'row ' + (m.from === myId ? 'me' : 'other');
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = m.text;
+  const t = document.createElement('span');
+  t.className = 'time';
+  t.textContent = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  b.appendChild(t);
+  row.appendChild(b);
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const text = $('input').value.trim();
+  if (!text) return;
+  db.ref(base + '/messages').push({ from: myId, text, ts: firebase.database.ServerValue.TIMESTAMP });
+  $('input').value = ''; $('input').style.height = 'auto';
+  setTyping(false);
+  $('input').focus();
+};
+
+$('input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 700) { e.preventDefault(); $('form').requestSubmit(); }
+});
+$('input').addEventListener('input', () => {
+  const el = $('input');
+  el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  setTyping(true);
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => setTyping(false), 1500);
+});
+
+function setTyping(v) {
+  const r = db.ref(base + '/typing/' + myId);
+  if (v) { r.onDisconnect().remove(); r.set(true); } else r.remove();
+}
+</script>
+</body>
+</html>
