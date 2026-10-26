@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Hum Do 💕</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#fff0f5;--me:#ff4d88;--other:#ffffff;--text:#2b2b2b;--muted:#8a8a8a}
+  html,body{height:100%}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  #app{display:flex;flex-direction:column;height:100dvh;max-width:700px;margin:0 auto;background:var(--bg)}
+  header{background:var(--me);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .avatar{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+  #pname{font-weight:600;font-size:16px}
+  #pstatus{font-size:12px;opacity:.9}
+  #msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:6px}
+  .row{display:flex}
+  .row.me{justify-content:flex-end}
+  .bubble{max-width:78%;padding:8px 12px 6px;border-radius:16px;font-size:15px;line-height:1.35;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .me .bubble{background:var(--me);color:#fff;border-bottom-right-radius:4px}
+  .other .bubble{background:var(--other);border-bottom-left-radius:4px}
+  .time{display:block;font-size:10px;opacity:.65;text-align:right;margin-top:2px}
+  .day{align-self:center;background:#ffd0e0;color:#a0305a;font-size:11px;padding:3px 10px;border-radius:10px;margin:6px 0}
+  #typing{height:20px;padding:0 16px;font-size:12px;color:var(--muted);font-style:italic}
+  form{display:flex;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #f3c9d9}
+  #input{flex:1;padding:12px 14px;border:2px solid #ffd0e0;border-radius:22px;font-size:16px;outline:none;resize:none;max-height:100px;font-family:inherit}
+  #input:focus{border-color:var(--me)}
+  #send{width:46px;height:46px;border:none;border-radius:50%;background:var(--me);color:#fff;font-size:20px;cursor:pointer;align-self:flex-end}
+  #full{display:none;position:fixed;inset:0;background:#fff0f5;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:18px;z-index:10}
+  #gate{display:none;position:fixed;inset:0;background:var(--bg);align-items:center;justify-content:center;padding:20px;z-index:20;overflow-y:auto}
+  .gbox{width:100%;max-width:380px;background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 4px 18px rgba(255,77,136,.2);text-align:center}
+  .gbox h2{color:var(--me);font-size:22px;margin-bottom:6px}
+  .gbox p{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .gbox input{width:100%;padding:12px 14px;border:2px solid #ffd0e0;border-radius:14px;font-size:16px;outline:none;font-family:inherit;text-align:center;margin-bottom:10px}
+  .gbox input:focus{border-color:var(--me)}
+  .gbtn{width:100%;padding:12px;border:none;border-radius:14px;background:var(--me);color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:8px}
+  .gbtn.alt{background:#ffe3ee;color:#a0305a}
+  .gerr{color:#d6204f;font-size:13px;min-height:18px;margin-bottom:6px}
+  .gdiv{height:1px;background:#f3c9d9;margin:12px 0}
+  #newCode{font-size:30px;font-weight:700;letter-spacing:6px;color:var(--me);margin:8px 0 12px;user-select:all}
+  .hide{display:none}
+  #logoutBtn{margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  #logoutBtn:active{background:rgba(255,255,255,.35)}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div class="avatar">💕</div>
+    <div>
+      <div id="pname">Hum Do</div>
+      <div id="pstatus">connecting...</div>
+    </div>
+    <button id="logoutBtn" type="button">Logout ⎋</button>
+  </header>
+  <div id="msgs"></div>
+  <div id="typing"></div>
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="Message likho..." autocomplete="off"></textarea>
+    <button id="send" type="submit">➤</button>
+  </form>
+</div>
+<div id="full">🚫 Yeh chat sirf 2 logon ke liye hai.<br>Room full hai.</div>
+
+<div id="gate">
+  <div class="gbox">
+    <h2>Hum Do 💕</h2>
+    <p>Apna code dalo. Dono log same code daloge to chat shuru ho jayegi.</p>
+    <input id="codeIn" placeholder="CODE" maxlength="12" autocomplete="off" autocapitalize="characters">
+    <div class="gerr" id="codeErr"></div>
+    <button class="gbtn" id="joinBtn" type="button">Connect 💞</button>
+    <div class="gdiv"></div>
+    <button class="gbtn alt" id="mkBtn" type="button">Code banao</button>
+    <div id="mkBox" class="hide">
+      <input id="mkIn" type="text" placeholder="Verify karne ke liye dalo" autocomplete="off" autocapitalize="off">
+      <div class="gerr" id="mkErr"></div>
+      <button class="gbtn" id="mkGo" type="button">Verify</button>
+    </div>
+    <div id="newBox" class="hide">
+      <p>Yeh code apne partner ko bhejo:</p>
+      <div id="newCode"></div>
+      <button class="gbtn alt" id="copyBtn" type="button">Copy code</button>
+      <button class="gbtn" id="startBtn" type="button">Chat shuru karo ➤</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAXs-rt_KU4d0BNOIvu3HushgUGVRUUkuM",
+  authDomain: "sagane.firebaseapp.com",
+  databaseURL: "https://sagane-default-rtdb.firebaseio.com",
+  projectId: "sagane",
+  storageBucket: "sagane.firebasestorage.app",
+  messagingSenderId: "509747736405",
+  appId: "1:509747736405:web:fec09510eb8a62860bc9dc",
+  measurementId: "G-QPC0S352FB"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let base = 'chat';
+const $ = id => document.getElementById(id);
+let lastDay = '', typingTimer, partnerId = null, watching = null;
+
+// is device ki pehchaan
+let myId = localStorage.getItem('hd_id');
+if (!myId) { myId = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('hd_id', myId); }
+
+// code gate: pehli baar code manga jata hai, dono same code dalein to room me 2 devices slot le lete hain
+const OK_HASH = 'g7v8etkvj'; // allowed email ka hash (email app me kahin likha nahi hai)
+function hh(s) {
+  let a = 0xdeadbeef, b = 0x41c6ce57;
+  for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); a = Math.imul(a ^ c, 2654435761); b = Math.imul(b ^ c, 1597334677); }
+  a = Math.imul(a ^ (a >>> 16), 2246822507) ^ Math.imul(b ^ (b >>> 13), 3266489909);
+  b = Math.imul(b ^ (b >>> 16), 2246822507) ^ Math.imul(a ^ (a >>> 13), 3266489909);
+  return (4294967296 * (2097151 & b) + (a >>> 0)).toString(36);
+}
+
+function joinRoom(code) {
+  base = 'rooms/' + code;
+  db.ref(base + '/members').transaction(cur => {
+    cur = cur || {};
+    if (cur[myId]) return cur;
+    if (Object.keys(cur).length >= 2) return;
+    cur[myId] = true;
+    return cur;
+  }).then(res => {
+    $('gate').style.display = 'none';
+    if (!res.committed) { $('full').style.display = 'flex'; return; }
+    localStorage.setItem('hd_code', code);
+    start();
+  }).catch(e => { $('gate').style.display = 'none'; $('pstatus').textContent = 'Error: ' + e.message; });
+}
+
+function showGate() { $('gate').style.display = 'flex'; }
+
+$('codeIn').addEventListener('input', () => { $('codeIn').value = $('codeIn').value.toUpperCase().replace(/[^A-Z0-9]/g, ''); $('codeErr').textContent = ''; });
+$('joinBtn').onclick = async () => {
+  const code = $('codeIn').value.trim().toUpperCase();
+  if (code.length < 4) { $('codeErr').textContent = 'Pura code dalo'; return; }
+  $('codeErr').textContent = 'check ho raha hai...';
+  try {
+    const s = await db.ref('rooms/' + code + '/created').once('value');
+    if (!s.val()) { $('codeErr').textContent = 'Galat code'; return; }
+    $('codeErr').textContent = '';
+    joinRoom(code);
+  } catch (e) { $('codeErr').textContent = 'Error: ' + e.message; }
+};
+
+$('mkBtn').onclick = () => { $('mkBox').classList.toggle('hide'); $('mkErr').textContent = ''; };
+$('mkGo').onclick = async () => {
+  const v = $('mkIn').value.trim().toLowerCase();
+  if (hh(v) !== OK_HASH) { $('mkErr').textContent = 'Galat, code nahi ban sakta'; return; }
+  $('mkErr').textContent = '';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  try {
+    for (let n = 0; n < 8; n++) {
+      let c = '';
+      for (let i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)];
+      const r = await db.ref('rooms/' + c + '/created').transaction(cur => cur ? undefined : true);
+      if (r.committed) {
+        $('newCode').textContent = c;
+        $('mkBox').classList.add('hide'); $('mkBtn').classList.add('hide');
+        $('newBox').classList.remove('hide');
+        return;
+      }
+    }
+    $('mkErr').textContent = 'Phir se try karo';
+  } catch (e) { $('mkErr').textContent = 'Error: ' + e.message; }
+};
+$('copyBtn').onclick = () => {
+  const c = $('newCode').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(c).then(() => { $('copyBtn').textContent = 'Copy ho gaya ✓'; });
+};
+$('startBtn').onclick = () => joinRoom($('newCode').textContent);
+
+const savedCode = localStorage.getItem('hd_code');
+if (savedCode) joinRoom(savedCode); else showGate();
+
+// logout: code localStorage se hata do, listeners band karo, wapas login (code) page par
+$('logoutBtn').onclick = () => {
+  if (!confirm('Logout karna hai?')) return;
+  try {
+    db.ref(base + '/online/' + myId).onDisconnect().cancel();
+    db.ref(base + '/online/' + myId).remove();
+    db.ref(base + '/typing/' + myId).remove();
+    db.ref('.info/connected').off();
+    db.ref(base + '/members').off();
+    db.ref(base + '/messages').off();
+    if (watching) { db.ref(base + '/online/' + watching).off(); db.ref(base + '/typing/' + watching).off(); }
+  } catch (e) {}
+  localStorage.removeItem('hd_code');
+  watching = null; partnerId = null; lastDay = '';
+  base = 'chat';
+  $('msgs').innerHTML = '';
+  $('typing').textContent = '';
+  $('pstatus').textContent = 'connecting...';
+  $('input').value = '';
+  $('full').style.display = 'none';
+  $('codeIn').value = ''; $('codeErr').textContent = '';
+  showGate();
+};
+
+function start() {
+  const onlineRef = db.ref(base + '/online/' + myId);
+  db.ref('.info/connected').on('value', s => {
+    if (s.val()) { onlineRef.onDisconnect().remove(); onlineRef.set(true); }
+  });
+
+  db.ref(base + '/members').on('value', snap => {
+    const m = snap.val() || {};
+    partnerId = Object.keys(m).find(k => k !== myId) || null;
+    watchPartner();
+  });
+
+  db.ref(base + '/messages').limitToLast(300).on('child_added', snap => addMsg(snap.val()));
+}
+
+function watchPartner() {
+  if (watching === partnerId) return;
+  if (watching) { db.ref(base + '/online/' + watching).off(); db.ref(base + '/typing/' + watching).off(); }
+  watching = partnerId;
+  if (!partnerId) { $('pstatus').textContent = 'partner ka wait...'; return; }
+  db.ref(base + '/online/' + partnerId).on('value', s => {
+    $('pstatus').textContent = s.val() ? '🟢 online' : 'offline';
+  });
+  db.ref(base + '/typing/' + partnerId).on('value', s => {
+    $('typing').textContent = s.val() ? 'typing...' : '';
+  });
+}
+
+function addMsg(m) {
+  if (!m) return;
+  const box = $('msgs');
+  const d = new Date(m.ts || Date.now());
+  const dayStr = d.toDateString();
+  if (dayStr !== lastDay) {
+    lastDay = dayStr;
+    const day = document.createElement('div');
+    day.className = 'day';
+    day.textContent = dayStr === new Date().toDateString() ? 'Aaj' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    box.appendChild(day);
+  }
+  const row = document.createElement('div');
+  row.className = 'row ' + (m.from === myId ? 'me' : 'other');
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = m.text;
+  const t = document.createElement('span');
+  t.className = 'time';
+  t.textContent = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  b.appendChild(t);
+  row.appendChild(b);
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const text = $('input').value.trim();
+  if (!text) return;
+  db.ref(base + '/messages').push({ from: myId, text, ts: firebase.database.ServerValue.TIMESTAMP });
+  $('input').value = ''; $('input').style.height = 'auto';
+  setTyping(false);
+  $('input').focus();
+};
+
+$('input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 700) { e.preventDefault(); $('form').requestSubmit(); }
+});
+$('input').addEventListener('input', () => {
+  const el = $('input');
+  el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  setTyping(true);
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => setTyping(false), 1500);
+});
+
+function setTyping(v) {
+  const r = db.ref(base + '/typing/' + myId);
+  if (v) { r.onDisconnect().remove(); r.set(true); } else r.remove();
+}
+</script>
+</body>
+</html>
