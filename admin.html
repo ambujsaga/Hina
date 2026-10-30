@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Hina's World - Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--sky:#7fd6ff;--sun:#ffd23f;--pink:#ff6b9d;--grass:#5ed36b;--ink:#1b1b2f;--card:#ffffff;--shadow:#1b1b2f;--muted:#5a5a78}
+@media (prefers-color-scheme:dark){:root{--sky:#2a6fa8;--card:#3a3670;--ink:#fffdf4;--shadow:#000;--muted:#c9c6e8}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Fredoka','Comic Sans MS',sans-serif;font-weight:500;color:var(--ink);background:var(--sky);
+background-image:radial-gradient(rgba(255,255,255,.55) 3px,transparent 3.5px);background-size:28px 28px;min-height:100vh}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 80px}
+h1{font-family:'Bangers',sans-serif;font-weight:400;font-size:clamp(36px,9vw,64px);letter-spacing:3px;margin:6px 0 2px;color:var(--sun);-webkit-text-stroke:3px #1b1b2f;paint-order:stroke fill;text-shadow:4px 4px 0 #1b1b2f;display:inline-block;transform:rotate(-2deg)}
+.sub{font-weight:700;margin:4px 0 16px}
+.btn{font-family:'Bangers',sans-serif;font-size:20px;letter-spacing:1.4px;padding:8px 18px;border:4px solid #1b1b2f;border-radius:999px;background:var(--grass);color:#1b1b2f;cursor:pointer;box-shadow:4px 4px 0 var(--shadow);transition:transform .12s,box-shadow .12s;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn:hover{transform:translate(-2px,-2px) rotate(-1deg);box-shadow:6px 6px 0 var(--shadow)}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+.btn.alt{background:var(--sun)}.btn.pink{background:var(--pink);color:#fff}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn[hidden]{display:none}
+.card{background:var(--card);border:5px solid #1b1b2f;border-radius:26px;box-shadow:8px 8px 0 var(--shadow);padding:16px}
+input[type=password]{width:100%;font:inherit;padding:12px 16px;border:4px solid #1b1b2f;border-radius:999px;background:#fff;color:#1b1b2f;text-align:center;margin:10px 0}
+.err{color:#d6204f;font-weight:700;min-height:20px}
+#gate{max-width:380px;margin:12vh auto 0;text-align:center}
+#app[hidden],#gate[hidden]{display:none}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+.count{font-family:'Bangers',sans-serif;font-size:26px;letter-spacing:1.5px;margin-right:auto;color:#fff;-webkit-text-stroke:2px #1b1b2f;paint-order:stroke fill;text-shadow:2px 2px 0 #1b1b2f}
+.drop{border:4px dashed #1b1b2f;border-radius:22px;background:rgba(255,255,255,.55);text-align:center;padding:26px 14px;font-weight:700;cursor:pointer;color:#1b1b2f}
+.drop.over{background:var(--sun)}
+.drop b{display:block;font-family:'Bangers',sans-serif;font-weight:400;font-size:28px;letter-spacing:1.5px}
+#prog{margin-top:12px;display:none}
+#prog.on{display:block}
+.pbar{height:18px;border:3px solid #1b1b2f;border-radius:999px;background:#fff;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--pink);transition:width .2s}
+#pTxt{font-size:14px;font-weight:700;margin-top:6px;color:#1b1b2f}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:6px}
+.ph{background:#fffafc;border:4px solid #1b1b2f;border-radius:18px;box-shadow:4px 4px 0 var(--shadow);overflow:hidden;position:relative;color:#1b1b2f}
+.ph.sel{outline:5px solid var(--pink);outline-offset:2px}
+.ph .im{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;background:linear-gradient(135deg,#ffc2da,#ff6b9d);cursor:zoom-in}
+.ph .act{display:flex;gap:6px;padding:8px;justify-content:center}
+.ph .act button{font-family:'Bangers',sans-serif;font-size:15px;letter-spacing:1px;padding:4px 10px;border:3px solid #1b1b2f;border-radius:999px;background:var(--sun);cursor:pointer;color:#1b1b2f;box-shadow:2px 2px 0 var(--shadow)}
+.ph .act button.d{background:var(--pink);color:#fff}
+.ph .ck{position:absolute;left:8px;top:8px;width:26px;height:26px;accent-color:var(--pink);cursor:pointer}
+.ph.busy{opacity:.5;pointer-events:none}
+.empty{grid-column:1/-1;text-align:center;font-weight:700;padding:24px}
+.note{margin-top:20px;font-size:14px;background:var(--card);border:4px dashed #1b1b2f;border-radius:18px;padding:12px 16px}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+#lb.on{display:flex}
+#lb img{max-width:100%;max-height:100%;border-radius:12px;border:4px solid #fff}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--sun);color:#1b1b2f;border:3px solid #1b1b2f;border-radius:999px;padding:6px 18px;font-weight:700;box-shadow:3px 3px 0 var(--shadow);z-index:60;display:none}
+#toast.on{display:block}
+</style>
+</head>
+<body>
+<div id="gate" class="card">
+  <h1>Admin</h1>
+  <p class="sub">Enter the admin password</p>
+  <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+  <div class="err" id="gErr"></div>
+  <button class="btn" id="gGo" type="button">Open</button>
+</div>
+
+<div id="app" class="wrap" hidden>
+  <h1>Hina's World Admin</h1>
+  <p class="sub">These photos appear in the romantic photo show on the home screen. Changes show up the next time the home page is opened.</p>
+
+  <div class="drop" id="drop">
+    <b>Add photos</b>
+    Tap here or drag photos in. You can pick many at once, there is no limit.
+  </div>
+  <div id="prog"><div class="pbar"><i id="pFill"></i></div><div id="pTxt"></div></div>
+
+  <div class="bar">
+    <div class="count" id="count">Photos: 0</div>
+    <button class="btn alt" id="selMode" type="button">Select</button>
+    <button class="btn alt" id="selAll" type="button" hidden>Select all</button>
+    <button class="btn pink" id="delSel" type="button" hidden>Delete selected</button>
+    <button class="btn" id="reload" type="button">Refresh</button>
+    <button class="btn pink" id="logout" type="button">Logout</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">Tip: tap a photo to see it bigger. <b>Replace</b> swaps the picture, <b>Delete</b> removes it from the home screen.</p>
+</div>
+
+<div id="lb"><img id="lbImg" alt=""></div>
+<div id="toast"></div>
+<input type="file" id="fileAdd" accept="image/*" multiple hidden>
+<input type="file" id="fileRep" accept="image/*" hidden>
+
+<script>
+/* ===== Settings ===== */
+var DB="https://sagane-default-rtdb.firebaseio.com/love";
+var PASS_HASH="o6x0wl8a0";           // default password: hina@admin  (change it, see note from developer)
+var FULL_MAX=1000,FULL_Q=0.82,THUMB_MAX=240,THUMB_Q=0.7;
+
+function hh(s){var a=0xdeadbeef,b=0x41c6ce57;for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677);}
+a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);
+b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);
+return (4294967296*(2097151&b)+(a>>>0)).toString(36)}
+var $=function(i){return document.getElementById(i)};
+function toast(t){var e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove("on")},2200)}
+
+/* ===== Login ===== */
+function unlock(){$("gate").hidden=true;$("app").hidden=false;load();}
+function tryLogin(){
+  var v=$("pw").value;
+  if(hh(v)===PASS_HASH){try{sessionStorage.setItem("adm","1")}catch(e){}unlock();}
+  else $("gErr").textContent="Wrong password";
+}
+$("gGo").onclick=tryLogin;
+$("pw").addEventListener("keydown",function(e){if(e.key==="Enter")tryLogin()});
+$("logout").onclick=function(){try{sessionStorage.removeItem("adm")}catch(e){}location.reload()};
+try{if(sessionStorage.getItem("adm")==="1")unlock();}catch(e){}
+
+/* ===== Firebase REST helpers ===== */
+function put(path,val){return fetch(DB+path+".json",{method:"PUT",body:JSON.stringify(val)}).then(function(r){if(!r.ok)throw new Error("Save failed ("+r.status+")");return r.json()})}
+function del(path){return fetch(DB+path+".json",{method:"DELETE"}).then(function(r){if(!r.ok)throw new Error("Delete failed ("+r.status+")")})}
+function get(path){return fetch(DB+path+".json").then(function(r){if(!r.ok)throw new Error("Load failed ("+r.status+")");return r.json()})}
+
+/* ===== Image compress ===== */
+function scaleTo(img,max,q){
+  var sw=img.naturalWidth,sh=img.naturalHeight,k=Math.min(1,max/Math.max(sw,sh));
+  var w=Math.max(1,Math.round(sw*k)),h=Math.max(1,Math.round(sh*k));
+  var c=document.createElement("canvas");c.width=w;c.height=h;
+  var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);
+  x.imageSmoothingQuality="high";x.drawImage(img,0,0,w,h);
+  return c.toDataURL("image/jpeg",q);
+}
+function loadImg(file){return new Promise(function(res,rej){
+  var u=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){URL.revokeObjectURL(u);res(im)};
+  im.onerror=function(){URL.revokeObjectURL(u);rej(new Error("Cannot read "+file.name))};
+  im.src=u})}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+
+/* ===== State + render ===== */
+var items=[],selMode=false,sel={};
+function load(){
+  $("grid").innerHTML='<div class="empty">Loading...</div>';
+  Promise.all([get("/index"),get("/thumb")]).then(function(r){
+    var idx=r[0]||{},th=r[1]||{};
+    items=Object.keys(idx).map(function(k){return {id:k,ts:+idx[k]||0,thumb:th[k]||""}});
+    items.sort(function(a,b){return b.ts-a.ts});
+    try{localStorage.setItem("lv_index",JSON.stringify(idx))}catch(e){}
+    sel={};render();
+  }).catch(function(e){$("grid").innerHTML='<div class="empty">'+e.message+'. Check your internet.</div>'});
+}
+function render(){
+  var g=$("grid");g.innerHTML="";
+  $("count").textContent="Photos: "+items.length;
+  if(!items.length){g.innerHTML='<div class="empty">No photos yet. Add some above. Until then the old default photos are shown on the home page.</div>';updSel();return;}
+  items.forEach(function(it){
+    var d=document.createElement("div");d.className="ph"+(sel[it.id]?" sel":"");d.id="p_"+it.id;
+    var im=document.createElement("img");im.className="im";im.alt="";im.src=it.thumb||"";
+    im.onclick=function(){if(selMode){toggle(it.id)}else view(it.id)};
+    d.appendChild(im);
+    if(selMode){var ck=document.createElement("input");ck.type="checkbox";ck.className="ck";ck.checked=!!sel[it.id];ck.onchange=function(){toggle(it.id)};d.appendChild(ck);}
+    var a=document.createElement("div");a.className="act";
+    var r=document.createElement("button");r.type="button";r.textContent="Replace";r.onclick=function(){replaceId=it.id;$("fileRep").click()};
+    var x=document.createElement("button");x.type="button";x.className="d";x.textContent="Delete";x.onclick=function(){delOne(it.id)};
+    a.appendChild(r);a.appendChild(x);d.appendChild(a);g.appendChild(d);
+  });
+  updSel();
+}
+function toggle(id){if(sel[id])delete sel[id];else sel[id]=1;var e=$("p_"+id);if(e){e.classList.toggle("sel",!!sel[id]);var c=e.querySelector(".ck");if(c)c.checked=!!sel[id];}updSel()}
+function updSel(){
+  var n=Object.keys(sel).length;
+  $("selAll").hidden=!selMode;$("delSel").hidden=!selMode||!n;
+  $("delSel").textContent="Delete selected ("+n+")";
+  $("selMode").textContent=selMode?"Done":"Select";
+}
+$("selMode").onclick=function(){selMode=!selMode;sel={};render()};
+$("selAll").onclick=function(){var all=Object.keys(sel).length===items.length;sel={};if(!all)items.forEach(function(i){sel[i.id]=1});render()};
+$("reload").onclick=load;
+
+/* ===== View ===== */
+function view(id){
+  $("lbImg").src=(items.filter(function(i){return i.id===id})[0]||{}).thumb||"";
+  $("lb").classList.add("on");
+  get("/img/"+id).then(function(u){if(u&&$("lb").classList.contains("on"))$("lbImg").src=u}).catch(function(){});
+}
+$("lb").onclick=function(){$("lb").classList.remove("on");$("lbImg").removeAttribute("src")};
+
+/* ===== Upload ===== */
+var uploading=false;
+function addFiles(files){
+  files=Array.prototype.filter.call(files||[],function(f){return !f.type||/^image\//.test(f.type)});
+  if(!files.length||uploading)return;
+  uploading=true;
+  var p=$("prog");p.classList.add("on");
+  var ok=0,fail=0,i=0;
+  function next(){
+    if(i>=files.length){
+      uploading=false;$("pFill").style.width="100%";
+      $("pTxt").textContent="Done: "+ok+" added"+(fail?", "+fail+" failed":"");
+      setTimeout(function(){p.classList.remove("on")},2500);load();return;
+    }
+    var f=files[i];
+    $("pFill").style.width=Math.round(i/files.length*100)+"%";
+    $("pTxt").textContent="Uploading "+(i+1)+" of "+files.length+"...";
+    loadImg(f).then(function(im){
+      var id=newId();
+      return put("/img/"+id,scaleTo(im,FULL_MAX,FULL_Q))
+        .then(function(){return put("/thumb/"+id,scaleTo(im,THUMB_MAX,THUMB_Q))})
+        .then(function(){return put("/index/"+id,Date.now())});   // index last: photo goes live only when fully saved
+    }).then(function(){ok++}).catch(function(){fail++}).then(function(){i++;next()});
+  }
+  next();
+}
+$("drop").onclick=function(){$("fileAdd").click()};
+$("fileAdd").onchange=function(e){var f=e.target.files;addFiles(f);e.target.value=""};
+["dragenter","dragover"].forEach(function(ev){$("drop").addEventListener(ev,function(e){e.preventDefault();$("drop").classList.add("over")})});
+["dragleave","drop"].forEach(function(ev){$("drop").addEventListener(ev,function(e){e.preventDefault();$("drop").classList.remove("over")})});
+$("drop").addEventListener("drop",function(e){addFiles(e.dataTransfer&&e.dataTransfer.files)});
+
+/* ===== Replace ===== */
+var replaceId=null;
+$("fileRep").onchange=function(e){
+  var f=e.target.files[0];e.target.value="";
+  var id=replaceId;replaceId=null;
+  if(!f||!id)return;
+  var card=$("p_"+id);if(card)card.classList.add("busy");
+  toast("Replacing...");
+  loadImg(f).then(function(im){
+    return put("/img/"+id,scaleTo(im,FULL_MAX,FULL_Q))
+      .then(function(){return put("/thumb/"+id,scaleTo(im,THUMB_MAX,THUMB_Q))});
+  }).then(function(){toast("Photo replaced");load()})
+  .catch(function(err){toast(err.message);if(card)card.classList.remove("busy")});
+};
+
+/* ===== Delete ===== */
+function removeId(id){return del("/index/"+id).then(function(){return Promise.all([del("/img/"+id),del("/thumb/"+id)])})}
+function delOne(id){
+  if(!confirm("Delete this photo?"))return;
+  var c=$("p_"+id);if(c)c.classList.add("busy");
+  removeId(id).then(function(){toast("Deleted");load()}).catch(function(e){toast(e.message);if(c)c.classList.remove("busy")});
+}
+$("delSel").onclick=function(){
+  var ids=Object.keys(sel);if(!ids.length)return;
+  if(!confirm("Delete "+ids.length+" photo(s)?"))return;
+  $("delSel").disabled=true;
+  Promise.all(ids.map(removeId)).then(function(){toast("Deleted "+ids.length);selMode=false;load()})
+    .catch(function(e){toast(e.message);load()}).then(function(){$("delSel").disabled=false});
+};
+</script>
+</body>
+</html>
