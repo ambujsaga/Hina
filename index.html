@@ -538,7 +538,7 @@ $("favBack").onclick=function(){closeFav();};
 window.addEventListener("popstate",function(){if(favOpen){$("favPage").hidden=true;favOpen=false;document.body.style.overflow="";}});
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&favOpen)closeFav();});
 /* ===== History + AI suggestions (OpenRouter) ===== */
-var OR_KEY="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";
+var OR_KEY="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";
 var OR_MODEL="openai/gpt-4o-mini";
 var HIST_KEY="cd_history",SUG_KEY="cd_picks",sugReq=0;
 function dec(s){var t=document.createElement("textarea");t.innerHTML=s||"";return t.value}
