@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snap Lens – Filters aur Lenses</title>
+<style>
+:root{--bg:#000;--fg:#fff;--yellow:#fffc00;--glass:rgba(20,20,24,.55);color-scheme:dark;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;touch-action:manipulation}
+#stage{position:fixed;inset:0;overflow:hidden;background:#111}
+#cam,#still,#ov{position:absolute;inset:0;width:100%;height:100%}
+#cam,#still{object-fit:cover}
+#still{display:none}
+.top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;z-index:5}
+.brand{font-weight:800;font-size:18px;letter-spacing:.3px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.icon{width:44px;height:44px;border-radius:50%;border:0;background:var(--glass);color:#fff;display:grid;place-items:center;backdrop-filter:blur(8px);cursor:pointer}
+.icon svg{width:22px;height:22px}
+.bottom{pointer-events:none;position:fixed;left:0;right:0;bottom:0;z-index:5;padding:40px 0 calc(env(safe-area-inset-bottom,0px) + 18px);background:linear-gradient(to top,rgba(0,0,0,.65),transparent);display:flex;flex-direction:column;align-items:center;gap:10px}
+.bottom>*{pointer-events:auto}
+.tabs{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--glass);backdrop-filter:blur(8px)}
+.tab{border:0;background:none;color:#fff;font:700 14px "Trebuchet MS","Segoe UI",system-ui,sans-serif;padding:8px 18px;border-radius:999px;cursor:pointer;opacity:.75}
+.tab.on{background:var(--yellow);color:#000;opacity:1}
+.chips{width:100%;display:flex;gap:14px;overflow-x:auto;padding:6px calc(50% - 32px);scroll-snap-type:x mandatory;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;width:64px;scroll-snap-align:center;border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font:600 11px "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+.chip i{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:26px;border:3px solid rgba(255,255,255,.55);background:#2a2a30;overflow:hidden;transition:transform .15s,border-color .15s}
+.chip i b{width:100%;height:100%;background:linear-gradient(135deg,#ff7a7a,#ffd36b 35%,#5fe0a5 65%,#5b8cff)}
+.chip.on i{border-color:var(--yellow);transform:scale(1.12)}
+.chip span{opacity:.85;white-space:nowrap}
+.shutter{width:78px;height:78px;border-radius:50%;border:5px solid #fff;background:transparent;padding:0;cursor:pointer;display:grid;place-items:center;transition:transform .1s}
+.shutter:active{transform:scale(.92)}
+.shutter::after{content:"";width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.18)}
+.shutter:disabled{opacity:.35}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9}
+#flash.go{animation:fl .35s ease-out}
+@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);background:rgba(0,0,0,.75);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;max-width:88%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+#msg{position:fixed;inset:0;z-index:12;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;text-align:center;background:radial-gradient(circle at 50% 30%,#2b2b44,#0b0b12)}
+#msg h2{margin:0;font-size:22px}
+#msg p{margin:0;max-width:300px;line-height:1.5;opacity:.8;font-size:15px}
+.btn{border:0;border-radius:999px;padding:13px 24px;font:700 15px "Trebuchet MS","Segoe UI",system-ui,sans-serif;background:var(--yellow);color:#000;cursor:pointer}
+.btn.ghost{background:var(--glass);color:#fff}
+#preview{position:fixed;inset:0;z-index:15;background:#000;display:none;flex-direction:column}
+#preview img{flex:1;min-height:0;width:100%;object-fit:contain}
+.pbar{display:flex;justify-content:center;gap:12px;padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 18px)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="cam" playsinline muted autoplay></video>
+  <img id="still" alt="">
+  <canvas id="ov"></canvas>
+</div>
+
+<div class="top">
+  <div class="brand">Snap Lens</div>
+  <button class="icon" id="flip" aria-label="Camera badlo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></button>
+</div>
+
+<div id="msg">
+  <h2>Camera nahi khul paya</h2>
+  <p id="why">Live camera nahi chal raha.</p>
+  <button class="btn" id="retry">Camera phir se try karo</button>
+</div>
+
+<div class="bottom">
+  <div class="tabs">
+    <button class="tab on" data-t="filters">Filters</button>
+    <button class="tab" data-t="lenses">Lenses</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <button class="shutter" id="shot" aria-label="Photo kheencho"></button>
+</div>
+
+<div id="flash"></div>
+<div id="toast"></div>
+<div id="preview">
+  <img id="pimg" alt="Kheenchi gayi photo">
+  <div class="pbar">
+    <button class="btn ghost" id="again">Dobara</button>
+    <button class="btn" id="save">Photo save karo</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const cam=$('#cam'),still=$('#still'),ov=$('#ov'),stage=$('#stage'),octx=ov.getContext('2d');
+const FILTERS=[
+ {n:'Normal',c:'none'},
+ {n:'Vivid',c:'saturate(1.7) contrast(1.1)'},
+ {n:'Warm',c:'sepia(.35) saturate(1.5) hue-rotate(-12deg) brightness(1.05)'},
+ {n:'Cool',c:'saturate(1.2) hue-rotate(185deg) brightness(1.05)'},
+ {n:'Dreamy',c:'blur(1.2px) brightness(1.15) saturate(1.3) contrast(.92)'},
+ {n:'Fade',c:'contrast(.8) brightness(1.2) saturate(.7)'},
+ {n:'Sepia',c:'sepia(.9) contrast(1.05)'},
+ {n:'B&W',c:'grayscale(1) contrast(1.15)'},
+ {n:'Noir',c:'grayscale(1) contrast(1.6) brightness(.8)'},
+ {n:'Pop',c:'contrast(1.4) saturate(2.1)'}
+];
+const LENSES=[
+ {n:'Koi nahi',e:'🚫',k:'none'},
+ {n:'Hearts',e:'❤️',k:'rise',em:'❤️',rate:.12},
+ {n:'Sparkle',e:'✨',k:'twk',em:'✨',rate:.35},
+ {n:'Snow',e:'❄️',k:'fall',em:'❄️',rate:.2},
+ {n:'Party',e:'🎉',k:'conf',rate:.6},
+ {n:'Bokeh',e:'🫧',k:'bok',rate:.05},
+ {n:'Neon',e:'🌈',k:'neon'},
+ {n:'Retro',e:'📼',k:'retro'}
+];
+let tab='filters',fi=0,li=0,facing='user',stream=null,fallback=false,blob=null,url=null;
+let dpr=1,W=0,H=0,parts=[];
+
+/* ---------- chips ---------- */
+function list(){return tab==='filters'?FILTERS:LENSES}
+function renderChips(){
+  const l=list(),cur=tab==='filters'?fi:li;
+  $('#chips').innerHTML=l.map((x,i)=>`<button class="chip${i===cur?' on':''}" data-i="${i}"><i>${tab==='filters'?`<b style="filter:${x.c}"></b>`:x.e}</i><span>${x.n}</span></button>`).join('');
+  centerActive();
+}
+function centerActive(){const a=document.querySelector('.chip.on');if(a)a.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}
+function select(i){
+  const l=list();i=(i+l.length)%l.length;
+  if(tab==='filters'){fi=i;applyFilter()}else{li=i;parts=[]}
+  document.querySelectorAll('.chip').forEach((c,j)=>c.classList.toggle('on',j===i));
+  centerActive();
+}
+function applyFilter(){cam.style.filter=still.style.filter=FILTERS[fi].c}
+$('#chips').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c)select(+c.dataset.i)});
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  tab=b.dataset.t;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));renderChips();
+}));
+
+/* swipe on screen to change filter/lens */
+let sx=null;
+stage.addEventListener('pointerdown',e=>{sx=e.clientX});
+stage.addEventListener('pointerup',e=>{
+  if(sx===null)return;const dx=e.clientX-sx;sx=null;
+  if(Math.abs(dx)>60)select((tab==='filters'?fi:li)+(dx<0?1:-1));
+});
+
+/* ---------- camera ---------- */
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+async function startCam(){
+  stopCam();
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('no-api');
+    stream=await Promise.race([
+      navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1920},height:{ideal:1080}},audio:false}),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+    ]);
+    cam.srcObject=stream;await cam.play();
+    cam.style.transform=facing==='user'?'scaleX(-1)':'none';
+    fallback=false;still.style.display='none';cam.style.display='block';
+    $('#msg').style.display='none';$('#shot').disabled=false;$('#flip').style.display='grid';
+  }catch(err){showMsg(err)}
+}
+function showMsg(err){
+  const n=err&&(err.message==='no-api'||err.message==='timeout'?err.message:err.name)||'';
+  let t='Live camera is browser me nahi chal raha.';
+  if(n==='no-api')t='Live camera ke liye page HTTPS par khulna chahiye. File seedhe kholne par ye block ho jata hai.';
+  else if(n==='timeout')t='Camera ki permission ka jawab nahi mila.';
+  else if(n==='NotAllowedError'||n==='SecurityError')t='Camera ki permission blocked hai. Browser ki site settings me Camera Allow karo.';
+  else if(n==='NotFoundError')t='Is device me camera nahi mila.';
+  else if(n==='NotReadableError')t='Camera kisi aur app me chal raha hai. Use band karke try karo.';
+  $('#why').textContent=t+'';
+  $('#msg').style.display='flex';
+  if(!fallback)$('#shot').disabled=true;
+}
+$('#retry').addEventListener('click',startCam);
+$('#flip').addEventListener('click',()=>{if(!fallback)facing=facing==='user'?'environment':'user';startCam()});
+
+/* ---------- lens overlay ---------- */
+function resize(){
+  dpr=Math.min(window.devicePixelRatio||1,2);
+  W=ov.width=Math.round(stage.clientWidth*dpr);H=ov.height=Math.round(stage.clientHeight*dpr);
+}
+window.addEventListener('resize',resize);
+function mk(L){
+  const d=dpr,r=Math.random,k=L.k;
+  const p={x:r()*W,y:0,vx:(r()-.5)*1.2*d,vy:0,vr:(r()-.5)*.05,r:r()*6,s:(16+r()*30)*d,e:L.em,t:0,dt:0,c:`hsl(${r()*360},90%,60%)`};
+  if(k==='rise'){p.y=H+30*d;p.vy=-(1+r()*2.2)*d}
+  if(k==='fall'){p.y=-30*d;p.vy=(.8+r()*2)*d}
+  if(k==='conf'){p.y=-20*d;p.vy=(1.5+r()*3)*d;p.vr=(r()-.5)*.3;p.s=(8+r()*10)*d}
+  if(k==='twk'){p.y=r()*H;p.vx=0;p.dt=.015+r()*.02;p.vr=.02}
+  if(k==='bok'){p.y=H+40*d;p.vy=-(.4+r()*.8)*d;p.s=(14+r()*34)*d;p.c=`hsla(${30+r()*300},90%,70%,1)`}
+  return p;
+}
+function vignette(col,a){
+  const g=octx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,col.replace('A',a));octx.fillStyle=g;octx.fillRect(0,0,W,H);
+}
+function tick(){
+  octx.clearRect(0,0,W,H);
+  const L=LENSES[li],k=L.k,d=dpr;
+  if(k==='rise'||k==='fall'||k==='twk'||k==='conf'||k==='bok'){
+    if(Math.random()<L.rate&&parts.length<90)parts.push(mk(L));
+    for(let i=parts.length-1;i>=0;i--){
+      const p=parts[i];p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.t+=p.dt;
+      if(p.y<-60*d||p.y>H+60*d||p.t>=1){parts.splice(i,1);continue}
+      octx.save();octx.translate(p.x,p.y);octx.rotate(p.r);
+      if(k==='twk')octx.globalAlpha=Math.sin(Math.PI*p.t);
+      if(k==='conf'){octx.fillStyle=p.c;octx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2)}
+      else if(k==='bok'){octx.globalAlpha=.3;octx.fillStyle=p.c;octx.beginPath();octx.arc(0,0,p.s,0,7);octx.fill();octx.globalAlpha=.5;octx.strokeStyle='#fff';octx.lineWidth=2*d;octx.stroke()}
+      else{octx.font=p.s+'px serif';octx.textAlign='center';octx.textBaseline='middle';octx.fillText(p.e,0,0)}
+      octx.restore();
+    }
+  }else if(k==='neon'){
+    const h=(performance.now()/18)%360,lw=10*d,pulse=.7+.3*Math.sin(performance.now()/260);
+    const g=octx.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.75);
+    g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`hsla(${h},100%,55%,${.45*pulse})`);
+    octx.fillStyle=g;octx.fillRect(0,0,W,H);
+    octx.save();octx.shadowColor=`hsl(${h},100%,60%)`;octx.shadowBlur=34*d*pulse;
+    octx.strokeStyle=`hsl(${h},100%,68%)`;octx.lineWidth=lw;
+    octx.strokeRect(14*d,14*d,W-28*d,H-28*d);octx.restore();
+  }else if(k==='retro'){
+    octx.fillStyle='rgba(0,0,0,.14)';
+    for(let y=0;y<H;y+=4*d)octx.fillRect(0,y,W,1.2*d);
+    vignette('rgba(40,10,0,A)',.55);
+    const n=new Date(),s=String(n.getDate()).padStart(2,'0')+' '+String(n.getMonth()+1).padStart(2,'0')+' ’'+String(n.getFullYear()).slice(2);
+    octx.font=`700 ${22*d}px "Courier New",monospace`;octx.textAlign='right';octx.textBaseline='alphabetic';
+    octx.fillStyle='#ff9a1f';octx.shadowColor='#ff5a00';octx.shadowBlur=8*d;
+    octx.fillText(s,W-24*d,H-190*d);octx.shadowBlur=0;
+    octx.fillStyle='#ff3b30';octx.beginPath();octx.arc(34*d,(stage.clientHeight>0?90:90)*d,7*d,0,7);octx.fill();
+    octx.font=`700 ${16*d}px "Courier New",monospace`;octx.textAlign='left';octx.fillText('REC',50*d,96*d);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---------- capture ---------- */
+function capture(){
+  const el=fallback?still:cam;
+  const sw=el.videoWidth||el.naturalWidth,sh=el.videoHeight||el.naturalHeight;
+  if(!sw||!sh){toast('Camera abhi ready nahi hai');return}
+  const ar=stage.clientWidth/stage.clientHeight;
+  let cw=sw,ch=sw/ar;if(ch>sh){ch=sh;cw=sh*ar}
+  const sx0=(sw-cw)/2,sy0=(sh-ch)/2,sc=Math.min(1,1920/Math.max(cw,ch));
+  const OW=Math.round(cw*sc),OH=Math.round(ch*sc);
+  const out=document.createElement('canvas');out.width=OW;out.height=OH;
+  const c=out.getContext('2d');
+  const canFilter='filter' in c;
+  if(canFilter)c.filter=FILTERS[fi].c;else if(fi>0)toast('Is browser me filter photo me save nahi hoga');
+  c.save();
+  if(!fallback&&facing==='user'){c.translate(OW,0);c.scale(-1,1)}
+  c.drawImage(el,sx0,sy0,cw,ch,0,0,OW,OH);
+  c.restore();
+  if(canFilter)c.filter='none';
+  c.drawImage(ov,0,0,OW,OH);
+  const f=$('#flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
+  out.toBlob(b=>{
+    if(!b)return;blob=b;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);
+    $('#pimg').src=url;$('#preview').style.display='flex';
+  },'image/jpeg',.92);
+}
+$('#shot').addEventListener('click',capture);
+$('#again').addEventListener('click',()=>{$('#preview').style.display='none'});
+$('#save').addEventListener('click',()=>{
+  if(!blob)return;
+  const name='snap-'+Date.now()+'.jpg';
+  try{
+    const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    toast('Photo download ho gayi – apne phone me dekho');
+  }catch(e){toast('Photo download nahi ho payi, dobara try karo')}
+});
+
+/* ---------- init ---------- */
+resize();renderChips();applyFilter();tick();startCam();
+})();
+</script>
+</body>
+</html>
