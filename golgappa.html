@@ -845,8 +845,8 @@ function drawFlowers(){
     octx.save();octx.translate(x,y);octx.rotate(T.a);octx.scale(sd*k,k);octx.globalAlpha=v;
     octx.drawImage(sp,-R*1.6,-R*1.6,R*3.2,R*3.2);octx.restore();
   };
+  /* sirf left kaan par phool (screen ke left side wala kaan) */
   one(T.lx,T.ly,-1,c01(1-(-T.t-.25)*3));
-  one(T.rx,T.ry,1,c01(1-(T.t-.25)*3));
 }
 function updateFl(){
   const p=$('#fl'),on=flOn()&&!!p;if(!p)return;
